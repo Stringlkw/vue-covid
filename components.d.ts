@@ -10,7 +10,9 @@ declare module 'vue' {
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElInput: typeof import('element-plus/es')['ElInput']
+    Line: typeof import('./src/components/Line/index.vue')['default']
     Pie: typeof import('./src/components/Pie/index.vue')['default']
+    'Pie copy': typeof import('./src/components/Pie copy/index.vue')['default']
     SvgIcon: typeof import('./src/components/SvgIcon/index.vue')['default']
   }
 }

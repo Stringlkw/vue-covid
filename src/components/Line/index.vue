@@ -1,42 +1,44 @@
 <script setup lang="ts">
-  import { pieDataType } from '@/types'
+  import { lineDataType } from '@/types'
   import * as echarts from 'echarts'
   import { onMounted, onBeforeUnmount, onUpdated } from 'vue'
   const props = defineProps<{
-    pieData: pieDataType[]
+    lineData: lineDataType[]
   }>()
   let charts: echarts.ECharts
-  const initPie = () => {
+  const initLine = () => {
     if (charts != null && charts != undefined) {
       charts.dispose()
     }
-    charts = echarts.init(document.querySelector('#pie') as HTMLElement)
+    charts = echarts.init(document.querySelector('#line') as HTMLElement)
     charts.setOption({
       backgroundColor: 'rgba(34,54,81,0.66)',
-      tooltip: {
-        trigger: 'item',
+      xAxis: {
+        type: 'category',
+        data: [],
+        axisLine: {
+          lineStyle: {
+            color: '#fff',
+          },
+        },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: {
+          lineStyle: {
+            color: '#fff',
+          },
+        },
+      },
+      label: {
+        color: '#fff',
+        show: true,
       },
       series: [
         {
-          name: 'PieForm',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          itemStyle: {
-            borderRadius: 4,
-            borderColor: '#fff',
-            borderWidth: 2,
-          },
-          label: {
-            color: '#fff',
-            show: true,
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: '15',
-            },
-          },
           data: [],
+          type: 'line',
+          smooth: true,
         },
       ],
     })
@@ -44,21 +46,24 @@
       charts.resize()
     })
   }
-  const setPie = (data: pieDataType[]) => {
+  const setLine = (data: lineDataType[]) => {
     charts.setOption({
+      xAxis: {
+        data: props.lineData.map((item) => item.name),
+      },
       series: [
         {
           name: 'PieForm',
-          data: data,
+          data: props.lineData.map((item) => item.value),
         },
       ],
     })
   }
   onUpdated(() => {
-    setPie(props.pieData)
+    setLine(props.lineData)
   })
   onMounted(() => {
-    initPie()
+    initLine()
   })
   onBeforeUnmount(() => {
     window.removeEventListener('resize', function () {
@@ -67,11 +72,11 @@
   })
 </script>
 <template>
-  <div id="pie"></div>
+  <div id="line"></div>
 </template>
 
 <style scoped lang="scss">
-  #pie {
+  #line {
     height: 100%;
     width: 100%;
   }

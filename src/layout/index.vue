@@ -1,9 +1,42 @@
 <script lang="ts" setup>
+  import 'animate.css'
   import useCovidStore from '@/store/useCovidStore'
   import China from '@/components/China/index.vue'
-  import 'animate.css'
+  import Pie from '@/components/Pie/index.vue'
+  import Line from '@/components/Line/index.vue'
+  import { lineDataType, mapDataType, pieDataType } from '@/types'
+  import { geoCoordMap } from '@/assets/js/geoMap'
+  import { ref } from 'vue'
 
   const covidStore = useCovidStore()
+  const mapData = ref([] as mapDataType[])
+  const pieData = ref([] as pieDataType[])
+  const lineData = ref([] as lineDataType[])
+  const getData = async () => {
+    await covidStore.getCovidList()
+    const province = covidStore.list.diseaseh5Shelf.areaTree[0].children
+    const city = covidStore.list.statisGradeCityDetail
+      .sort((a, b) => {
+        return b.nowConfirm - a.nowConfirm
+      })
+      .slice(0, 10)
+    mapData.value = province.map((v) => {
+      return {
+        name: v.name,
+        value: geoCoordMap[v.name].concat(v.total.confirm),
+        children: v.children,
+      }
+    })
+
+    pieData.value = city.map((v) => {
+      return {
+        name: v.city,
+        value: v.nowConfirm,
+      }
+    })
+    lineData.value = pieData.value
+  }
+  getData()
 </script>
 <template>
   <div class="container">
@@ -40,9 +73,10 @@
           <div>累计死亡</div>
         </section>
       </div>
-      <div class="left-pie"><Pie></Pie></div>
+      <div class="left-pie"><Pie :pie-data="pieData" /></div>
+      <div class="left-line"><Line :line-data="lineData" /></div>
     </div>
-    <div class="container-center"><China></China></div>
+    <div class="container-center"><China :map-data="mapData" /></div>
     <div class="container-right">
       <table>
         <thead>
@@ -74,12 +108,15 @@
     background-size: cover;
     background-image: url(http://127.0.0.1:5000/image/background-3.png);
     height: 100%;
+    overflow: auto;
 
     .container-left {
-      flex-basis: 30%;
+      flex-basis: 400px;
       height: 100%;
       display: flex;
       flex-direction: column;
+      // align-items: center;
+      justify-content: center;
 
       .left-card {
         color: white;
@@ -103,9 +140,14 @@
           }
         }
       }
-
       .left-pie {
-        height: inherit;
+        height: 30%;
+        width: 100%;
+        margin-top: 20px;
+      }
+      .left-line {
+        height: 30%;
+        width: 100%;
         margin-top: 20px;
       }
     }
@@ -118,7 +160,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 450px;
+      width: 400px;
 
       table {
         color: white;

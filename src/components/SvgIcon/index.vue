@@ -11,7 +11,6 @@
    * 判断当前图标是否为外部图标
    * */
   const isExternal = computed(() => external(props.icon))
-
   /*
    * 外部图标样式
    * */

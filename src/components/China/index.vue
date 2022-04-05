@@ -1,16 +1,19 @@
 <script setup lang="ts">
   import * as echarts from 'echarts'
-  import { onMounted } from 'vue'
+  import { onBeforeUnmount, onMounted, onUpdated, ref } from 'vue'
 
   import '@/assets/js/China'
   import '@/assets/js/geoMap'
   import { geoCoordMap } from '@/assets/js/geoMap'
   import { mapDataType } from '@/types'
   import useCovidStore from '@/store/useCovidStore'
+  const props = defineProps<{
+    mapData: mapDataType[]
+  }>()
 
   const covidStore = useCovidStore()
+  let charts: echarts.ECharts
   const setCharts = (data: mapDataType[]) => {
-    const charts = echarts.init(document.querySelector('#china') as HTMLElement)
     charts.setOption({
       series: [
         {
@@ -24,8 +27,11 @@
       ],
     })
   }
-  const initCharts = (data: mapDataType[]) => {
-    const charts = echarts.init(document.querySelector('#china') as HTMLElement)
+  const initCharts = () => {
+    if (charts != null && charts != undefined) {
+      charts.dispose()
+    }
+    charts = echarts.init(document.querySelector('#china') as HTMLElement)
     charts.setOption({
       geo: {
         map: 'china',
@@ -89,13 +95,13 @@
           layoutSize: '100%',
           label: {
             show: true,
-            color: '#FFFFFF',
+            color: '#fff',
             fontSize: 12,
           },
           itemStyle: {
-            areaColor: '#0c3653',
+            areaColor: '#1c3653',
             borderColor: '#1cccff',
-            borderWidth: 1.8,
+            borderWidth: 1.0,
           },
           emphasis: {
             areaColor: '#56b1da',
@@ -104,14 +110,14 @@
               color: '#fff',
             },
           },
-          data: data,
+          data: [],
         },
         {
           name: '确诊人数',
           type: 'scatter',
           coordinateSystem: 'geo',
           symbol: 'pin',
-          symbolSize: [45, 45],
+          symbolSize: [40, 40],
           label: {
             show: true,
             color: '#fff',
@@ -122,7 +128,7 @@
           itemStyle: {
             color: '#1E90FF', //标志颜色
           },
-          data: data,
+          data: [],
         },
       ],
     })
@@ -133,22 +139,16 @@
       charts.resize()
     }
   }
-  const getData = async () => {
-    await covidStore.getCovidList()
-    const province = covidStore.list.diseaseh5Shelf.areaTree[0].children
-
-    const data: mapDataType[] = province.map((v) => {
-      return {
-        name: v.name,
-        value: geoCoordMap[v.name].concat(v.total.confirm),
-        children: v.children,
-      }
-    })
-    setCharts(data)
-  }
-  getData()
+  onUpdated(() => {
+    setCharts(props.mapData)
+  })
   onMounted(() => {
-    initCharts([])
+    initCharts()
+  })
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', function () {
+      charts.resize()
+    })
   })
 </script>
 <template>

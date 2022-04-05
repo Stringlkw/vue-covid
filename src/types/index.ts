@@ -135,12 +135,24 @@ interface mapDataType {
   children: Children[]
 }
 
+interface pieDataType {
+  name: string
+  value: number
+}
+
+interface lineDataType {
+  name: string
+  value: number
+}
+
 export {
   registerType,
   loginType,
   userInfoType,
   mapDataType,
   geoMapType,
+  pieDataType,
+  lineDataType,
   ChinaTotal,
   ChinaAdd,
   ShowAddSwitch,
